@@ -123,7 +123,7 @@ body.moonlit .aurora{
 /* ===== EXPERIENCE ===== */
 #exp{position:relative;z-index:10}
 .scene{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:max(90px,14vh) 26px;position:relative}
+  text-align:center;padding:max(90px,14vh) 26px;position:relative;overflow-x:clip}
 .eyebrow{font-size:10.5px;letter-spacing:.42em;text-transform:uppercase;color:var(--dimmer);margin-bottom:18px}
 .sec-title{font-family:var(--serif);font-weight:500;font-size:clamp(30px,6.4vw,52px);line-height:1.2;
   margin-bottom:clamp(40px,7vh,72px);max-width:20ch}
