@@ -82,74 +82,21 @@ const Sky = (() => {
     fadeTo(v){ dimT = v; } };
 })();
 
-/* ================= SOUND ================= */
+/* ================= SOUND (interaction sfx) ================= */
 const Sound = (() => {
-  let ctx=null, master=null, music=null, sfx=null, started=false, playing=false, timers=[], ci=0;
-  let lp=null, delay=null;
-  const CHORDS = [
-    [220.00, 261.63, 329.63, 493.88],
-    [174.61, 261.63, 349.23, 523.25],
-    [196.00, 293.66, 392.00, 587.33],
-    [130.81, 261.63, 329.63, 523.25]
-  ];
+  let ctx = null, sfx = null, started = false;
   function unlock(){
     if(started) return; started = true;
     try{
       ctx = new (window.AudioContext||window.webkitAudioContext)();
-      master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
-      music = ctx.createGain(); music.gain.value = 1;
       sfx = ctx.createGain(); sfx.gain.value = .5;
-      lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 2400;
-      delay = ctx.createDelay(1); delay.delayTime.value = .44;
-      const fb = ctx.createGain(); fb.gain.value = .34;
-      const wet = ctx.createGain(); wet.gain.value = .2;
-      delay.connect(fb); fb.connect(delay);
-      delay.connect(wet); wet.connect(lp);
-      lp.connect(music);
-      music.connect(master); sfx.connect(master);
+      sfx.connect(ctx.destination);
       state.unlockedAudio = true;
     }catch(e){}
   }
-  function pad(freq, t, dur, vol){
-    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
-    o.type='sine'; o2.type='triangle';
-    o.frequency.value = freq; o2.frequency.value = freq; o2.detune.value = 5;
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t + dur*.34);
-    g.gain.setValueAtTime(vol, t + dur*.56);
-    g.gain.linearRampToValueAtTime(0, t + dur);
-    o.connect(g); o2.connect(g); g.connect(lp); g.connect(delay);
-    o.start(t); o2.start(t); o.stop(t+dur+.1); o2.stop(t+dur+.1);
-  }
-  function spark(freq, t, vol){
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type='sine'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t+.03);
-    g.gain.exponentialRampToValueAtTime(.0001, t+2.6);
-    o.connect(g); g.connect(lp); g.connect(delay);
-    o.start(t); o.stop(t+2.8);
-  }
-  function musicLoop(){
-    if(!playing || !ctx) return;
-    const t = ctx.currentTime + .06, dur = 9;
-    CHORDS[ci % CHORDS.length].forEach((f,i) => pad(f, t, dur+2.2, .05 - i*.005));
-    const pent = [523.25, 587.33, 659.25, 783.99, 880];
-    spark(pent[Math.floor(rand(0,pent.length))], t+rand(1.5,7.5), .026);
-    ci++;
-    timers.push(setTimeout(musicLoop, dur*1000));
-  }
-  function startAmbient(){
-    unlock(); if(!ctx) return;
-    if(ctx.state === 'suspended') ctx.resume();
-    if(playing) return;
-    playing = true;
-    if(state.muted) return;
-    master.gain.setTargetAtTime(.85, ctx.currentTime, 1.4);
-    musicLoop();
-  }
   function chime(f=880, vol=.16){
     if(!ctx || state.muted) return;
+    if(ctx.state === 'suspended') ctx.resume();
     const t = ctx.currentTime;
     [f, f*1.5].forEach((fr,i) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
@@ -163,6 +110,7 @@ const Sound = (() => {
   }
   function whoosh(){
     if(!ctx || state.muted) return;
+    if(ctx.state === 'suspended') ctx.resume();
     const t = ctx.currentTime, len = .5;
     const buf = ctx.createBuffer(1, ctx.sampleRate*len, ctx.sampleRate);
     const d = buf.getChannelData(0);
@@ -180,6 +128,7 @@ const Sound = (() => {
   }
   function pop(){
     if(!ctx || state.muted) return;
+    if(ctx.state === 'suspended') ctx.resume();
     const t = ctx.currentTime;
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type='sine';
@@ -191,29 +140,74 @@ const Sound = (() => {
     o.start(t); o.stop(t+.32);
     chime(1046.5, .08);
   }
-  function mute(v){
-    state.muted = v;
-    if(!ctx) return;
-    master.gain.setTargetAtTime(v ? 0 : (playing ? .85 : 0), ctx.currentTime, .5);
-    if(v){ timers.forEach(clearTimeout); timers = []; }
-    else if(playing && !timers.length){ musicLoop(); }
+  return { unlock, chime, whoosh, pop };
+})();
+
+/* ================= MUSIC — Taaj (Instrumental), Lost Stories ================= */
+const Music = (() => {
+  const TAAJ_ID = 'h7r67MpcGAQ', START = 38, VOL = 60;
+  let player = null, ready = false, started = false, wantSound = true;
+
+  window.onYouTubeIframeAPIReady = () => {
+    try{
+      player = new YT.Player('ytPlayer', {
+        videoId: TAAJ_ID,
+        playerVars: { autoplay:1, controls:0, playsinline:1, rel:0, modestbranding:1,
+                      iv_load_policy:3, start:START, loop:1, playlist:TAAJ_ID },
+        events: {
+          onReady(){
+            ready = true;
+            try{
+              player.setVolume(VOL); player.mute();
+              player.seekTo(START, true); player.playVideo();
+            }catch(e){}
+            if(started) syncMute();
+          },
+          onError(){},
+          onStateChange(e){
+            // keep it looping from the hook
+            if(e && e.data === 0){ try{ player.seekTo(START, true); player.playVideo(); }catch(err){} }
+          }
+        }
+      });
+    }catch(e){}
+  };
+
+  function syncMute(){
+    if(!ready) return;
+    try{
+      if(!wantSound || state.muted){ player.mute(); }
+      else {
+        player.unMute(); player.setVolume(VOL);
+        if(player.getCurrentTime && player.getCurrentTime() < START - 1) player.seekTo(START, true);
+        player.playVideo();
+      }
+    }catch(e){}
   }
-  return { unlock, startAmbient, chime, whoosh, pop, mute, get muted(){return state.muted;} };
+  function unlock(){
+    started = true;
+    syncMute();
+  }
+  function setMuted(v){
+    state.muted = v;
+    syncMute();
+  }
+  return { unlock, setMuted };
 })();
 
 const musicBtn = $('#musicBtn');
 musicBtn.addEventListener('click', e => {
   e.stopPropagation();
-  Sound.unlock();
-  Sound.mute(!Sound.muted);
-  musicBtn.classList.toggle('muted', Sound.muted);
-  musicBtn.setAttribute('aria-pressed', String(!Sound.muted));
+  const nowMuted = !state.muted;
+  Music.setMuted(nowMuted);
+  musicBtn.classList.toggle('muted', nowMuted);
+  musicBtn.setAttribute('aria-pressed', String(!nowMuted));
 });
 
 /* first interaction unlocks audio + soft ambient */
 addEventListener('pointerdown', () => {
   Sound.unlock();
-  if(!Sound.muted) Sound.startAmbient();
+  Music.unlock();
 }, { once:true, capture:true });
 
 /* ================= NAME ================= */
