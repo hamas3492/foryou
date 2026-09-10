@@ -3,178 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#05050f">
-<title>A Little Something — For You</title>
-<meta name="description" content="A small, quiet place — made for one person.">
-<meta property="og:title" content="A Little Something — For You">
-<meta property="og:description" content="A small, quiet place — made for one person.">
-<meta property="og:type" content="website">
+<meta name="theme-color" content="#05060f">
+<title>For You</title>
+<meta name="description" content="A small interactive experience — made for one person.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23a78bfa'>✦</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1789028415">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=1789029403">
 </head>
-<body class="locked">
+<body>
 
-<!-- atmosphere layers -->
 <canvas id="sky" aria-hidden="true"></canvas>
-<div class="moon" id="moon" aria-hidden="true"></div>
 <div class="aurora" aria-hidden="true"></div>
 <div class="vignette" aria-hidden="true"></div>
-<div class="grain" aria-hidden="true"></div>
+<div id="veil" aria-hidden="true"></div>
 
-<!-- transitions -->
-<div id="flash" aria-hidden="true"></div>
-<div id="sweep" aria-hidden="true"></div>
-
-<!-- music -->
-<button id="musicBtn" class="attn" aria-label="Play ambient music" aria-pressed="false" title="Music">
-  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+<button id="musicBtn" aria-label="Sound on / off" aria-pressed="true" title="Sound">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
 </button>
 
-<!-- ============ GATE: name ============ -->
-<div id="gate">
-  <div class="gate__inner">
-    <p class="gate__pre">Before we begin...</p>
-    <h1 class="gate__title">What's your <em>name?</em></h1>
-    <input id="nameField" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="type it here" aria-label="Your name">
-    <p class="gate__err" id="gateErr" role="alert"></p>
-    <button id="gateBtn">Continue
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </button>
-    <p class="gate__hint">sound is optional — there's a quiet control at the top right</p>
+<!-- ============ SCENE 1 · NAME ============ -->
+<section class="sc active" id="sc-name" aria-label="Introduction">
+  <div class="sc__inner">
+    <p class="cine" id="namePre">Before anything else...</p>
+    <div class="namewrap" id="nameWrap" hidden>
+      <p class="ask">Tell me your <em>name.</em></p>
+      <input id="nameField" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="Your name" aria-label="Your name">
+      <p class="nameerr" id="nameErr" role="alert"></p>
+      <button id="enterBtn">Enter</button>
+    </div>
+    <p class="cine" id="welcomeLine" aria-live="polite"></p>
   </div>
-</div>
+</section>
 
-<!-- cinema overlay -->
-<div id="cinema" aria-hidden="true"><p id="cineLine" aria-live="polite"></p></div>
-
-<!-- ============ EXPERIENCE ============ -->
-<main id="exp" hidden>
-
-  <!-- 1 · reveal -->
-  <section class="scene scene--reveal" id="s-reveal">
-    <div class="rev-stage">
-      <p class="rev-phase" id="rev1">Today isn't just another day.</p>
-      <p class="rev-phase" id="rev2">Because it's your day, <span class="nm" data-nm></span>.</p>
-      <div class="rev-final" id="revFinal">
-        <div class="rev-glow" aria-hidden="true"></div>
-        <h1 class="rev-big">Happy Birthday,</h1>
-        <h1 class="rev-big rev-big--name"><span class="nm" data-nm></span></h1>
-      </div>
+<!-- ============ SCENE 2 · MYSTERY ENVELOPE ============ -->
+<section class="sc" id="sc-envelope" aria-label="A mysterious envelope">
+  <div class="env-stage">
+    <div class="env" id="env" role="button" tabindex="0" aria-label="A glowing envelope — touch it">
+      <div class="env__glow" aria-hidden="true"></div>
+      <div class="env__back" aria-hidden="true"></div>
+      <div class="env__letter" aria-hidden="true"></div>
+      <div class="env__flap" aria-hidden="true"></div>
+      <div class="env__seal" aria-hidden="true">✦</div>
     </div>
-    <button class="ghost-btn" id="waitBtn">There's something waiting for you
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
-    </button>
-  </section>
-
-  <!-- 2 · written message -->
-  <section class="scene" id="s-message">
-    <p class="eyebrow">written, not said</p>
-    <h2 class="sec-title">Some words are better <em>written</em> than said.</h2>
-    <div class="msg">
-      <p class="msg__line"><span class="nm" data-nm></span> — I won't start this with a long speech.</p>
-      <p class="msg__line">Just this: the world feels a little lighter with you in it.</p>
-      <p class="msg__line">You're one of those rare people who makes calm feel contagious —</p>
-      <p class="msg__line">the kind others want to keep around, without ever quite knowing why.</p>
-      <p class="msg__line">Today isn't about becoming something new.</p>
-      <p class="msg__line">It's about pausing long enough to notice how far you've already come.</p>
-      <p class="msg__line">So be slow today. Be unapologetically happy, <span class="nm" data-nm></span>.</p>
-      <p class="msg__line">You've earned every quiet bit of it.</p>
-    </div>
-  </section>
-
-  <!-- 3 · wishes -->
-  <section class="scene" id="s-wishes">
-    <p class="eyebrow">seven quiet wishes</p>
-    <h2 class="sec-title">For the year <em>ahead.</em></h2>
-    <div class="wishes">
-      <div class="wcard"><span class="wcard__num">01</span><p>More peace.</p></div>
-      <div class="wcard"><span class="wcard__num">02</span><p>More happiness.</p></div>
-      <div class="wcard"><span class="wcard__num">03</span><p>More beautiful moments.</p></div>
-      <div class="wcard"><span class="wcard__num">04</span><p>More success.</p></div>
-      <div class="wcard"><span class="wcard__num">05</span><p>More reasons to smile.</p></div>
-      <div class="wcard"><span class="wcard__num">06</span><p>More ease in every difficult chapter.</p></div>
-      <div class="wcard"><span class="wcard__num">07</span><p>More barakah in everything you do.</p></div>
-    </div>
-  </section>
-
-  <!-- 4 · dua -->
-  <section class="scene scene--dua" id="s-dua">
-    <svg class="dua__crescent" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M20.4 14.2A8.8 8.8 0 1 1 9.8 3.6a7 7 0 1 0 10.6 10.6z"/></svg>
-    <p class="eyebrow">a quiet moment</p>
-    <h2 class="sec-title">A little dua for you, <em><span class="nm" data-nm></span></em>.</h2>
-    <div class="dua">
-      <p class="dua__line">Ya Allah —</p>
-      <p class="dua__line">today, as <span class="nm" data-nm></span> steps into another year, wrap them in a peace that doesn't shake easily.</p>
-      <p class="dua__line">Grant them health that stays, happiness that doesn't need a reason, and success that feels truly earned.</p>
-      <p class="dua__line">Protect them from every harm they will never see coming, and from everything that was never meant for them.</p>
-      <p class="dua__line">Place barakah in their work, their time, and every bond they hold close.</p>
-      <p class="dua__line">Write ease into every difficult chapter still ahead, and contentment into the ordinary days in between.</p>
-      <p class="dua__line">And open doors more beautiful than the ones they thought were closing.</p>
-      <p class="dua__line dua__ameen">Ameen.</p>
-    </div>
-  </section>
-
-  <!-- 5 · hold -->
-  <section class="scene scene--hold" id="s-hold">
-    <div class="hold-inner" id="holdInner">
-      <p class="hold-pre" id="holdPre">One last thing...</p>
-      <p class="hold-sub" id="holdSub">Press and hold.</p>
-      <div class="hold-wrap">
-        <button id="holdBtn" aria-label="Hold for ten seconds">
-          <svg class="ring" viewBox="0 0 220 220" aria-hidden="true">
-            <defs>
-              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#a78bfa"/>
-                <stop offset="1" stop-color="#60a5fa"/>
-              </linearGradient>
-            </defs>
-            <circle class="ring__track" cx="110" cy="110" r="100"/>
-            <circle class="ring__prog" id="ringProg" cx="110" cy="110" r="100"/>
-          </svg>
-          <span class="hold__time" id="holdTime" role="status">10</span>
-          <span class="hold__label">hold</span>
-        </button>
-      </div>
-      <p class="hold-msg" id="holdMsg" aria-live="polite">press and hold for ten seconds</p>
-    </div>
-  </section>
-
-  <!-- ============ AFTER TRANSFORMATION ============ -->
-  <div id="after" hidden>
-
-    <section class="scene scene--made" id="s-made">
-      <h2 class="made-title" id="madeTitle">You made it.</h2>
-      <p class="made-sub" id="madeSub">And maybe this little journey was worth the wait, <span class="nm" data-nm></span>.</p>
-      <p class="scrollcue" id="madeCue">scroll gently
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
-      </p>
-    </section>
-
-    <section class="scene scene--final" id="s-final">
-      <p class="final-name"><span class="nm" data-nm></span>,</p>
-      <div class="final-lines">
-        <p class="final-line">May the coming year bring you closer to everything that makes your heart peaceful.</p>
-        <p class="final-line">May Allah fill your life with happiness, protect you from what isn't meant for you, and bless you with what is.</p>
-      </div>
-    </section>
-
-    <section class="scene scene--end" id="s-end">
-      <h1 class="end-big">Happy Birthday, <em><span class="nm" data-nm></span></em>.</h1>
-      <p class="end-sub">May this year be kinder, brighter and more beautiful than the last.</p>
-      <p class="end-made">Made with care.</p>
-      <div class="end-fade" aria-hidden="true"></div>
-    </section>
-
+    <p class="hint" id="envHint">touch it</p>
   </div>
-</main>
+</section>
+
+<!-- ============ SCENE 3 · FIND THE STARS ============ -->
+<section class="sc" id="sc-stars" aria-label="Find the glowing stars">
+  <div class="stars-head">
+    <p class="cine" id="starsL1">Look closely.</p>
+    <p class="cine cine--sm" id="starsL2" hidden>Three stars glow differently. Tap them.</p>
+  </div>
+  <p class="stars-count" id="starCount" hidden aria-live="polite">3 more</p>
+  <button class="sstar" style="--x:20%;--y:24%" aria-label="A glowing star"></button>
+  <button class="sstar" style="--x:76%;--y:34%" aria-label="A glowing star"></button>
+  <button class="sstar" style="--x:46%;--y:64%" aria-label="A glowing star"></button>
+  <p class="cine cine--sm" id="starsDone" hidden>The sky is listening...</p>
+</section>
+
+<!-- ============ SCENE 4 · THE REVEAL ============ -->
+<section class="sc" id="sc-reveal" aria-label="The birthday reveal">
+  <div class="sc__inner">
+    <p class="cine" id="revL1">Okay, <span class="nm"></span>...</p>
+    <p class="cine" id="revL2" hidden>Now I can finally say it.</p>
+    <h1 class="hb" id="revHB" hidden>HAPPY<br>BIRTHDAY</h1>
+    <p class="tapcue" id="revCue" hidden>tap anywhere</p>
+  </div>
+</section>
+
+<!-- ============ SCENE 5 · THE GIFT ============ -->
+<section class="sc" id="sc-gift" aria-label="A floating gift">
+  <div class="gift-stage">
+    <div class="gift" id="gift" role="button" tabindex="0" aria-label="A floating gift box — touch it">
+      <div class="gift__glow" aria-hidden="true"></div>
+      <div class="gift__beam" aria-hidden="true"></div>
+      <div class="gift__box" aria-hidden="true">
+        <div class="gift__rb gift__rb--v"></div>
+        <div class="gift__rb gift__rb--h"></div>
+        <div class="gift__lid"></div>
+        <div class="gift__lidrb"></div>
+      </div>
+    </div>
+    <p class="hint" id="giftHint">touch it</p>
+    <p class="cine" id="giftMsg" hidden>One little surprise...</p>
+  </div>
+</section>
+
+<!-- ============ SCENE 6 · THE LETTER ============ -->
+<section class="sc" id="sc-letter" aria-label="A personal message">
+  <div class="sc__inner">
+    <p class="l-line" id="letterLine" aria-live="polite"></p>
+    <div class="dots" id="letterDots" aria-hidden="true"></div>
+    <p class="tapcue">tap to continue</p>
+  </div>
+</section>
+
+<!-- ============ SCENE 7 · WISHES CONSTELLATION ============ -->
+<section class="sc" id="sc-wishes" aria-label="A constellation of wishes">
+  <p class="cw-hint">Some stars hold wishes.<br>Tap them.</p>
+  <p class="cw-count" id="cwCount" aria-live="polite">0 of 6</p>
+  <svg class="cw-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <polyline id="cwLine" points="" vector-effect="non-scaling-stroke"/>
+  </svg>
+  <div id="cwStars"></div>
+  <button class="cw-star cw-star--final" id="cwFinal" hidden aria-label="A bright star appeared"></button>
+  <p class="cw-wish" id="cwWish" aria-live="polite"></p>
+</section>
+
+<!-- ============ SCENE 8 · DUA ============ -->
+<section class="sc" id="sc-dua" aria-label="A little dua">
+  <div class="dua-moon" aria-hidden="true"></div>
+  <div class="sc__inner">
+    <h2 class="dua-h" id="duaH" hidden>A little dua for you, <em class="nm"></em>.</h2>
+    <div class="dua-lines" id="duaLines">
+      <p hidden>Ya Allah,</p>
+      <p hidden>grant <span class="nm"></span> a year of peace, health and ease.</p>
+      <p hidden>Protect them from every harm they'll never see coming,</p>
+      <p hidden>place barakah in everything they do,</p>
+      <p hidden>and write happiness into their ordinary days.</p>
+      <p class="ameen" hidden>Ameen.</p>
+    </div>
+    <p class="tapcue" id="duaCue" hidden>tap anywhere</p>
+  </div>
+</section>
+
+<!-- ============ SCENE 9 · THE LAST THING ============ -->
+<section class="sc" id="sc-seed" aria-label="One last thing">
+  <div class="seed-stage">
+    <p class="cine" id="seedLine">There's still one thing...</p>
+    <button class="seed" id="seed" aria-label="A tiny glowing light — touch it"></button>
+    <p class="hint" id="seedHint">touch it</p>
+  </div>
+</section>
+
+<!-- ============ FINAL ============ -->
+<section class="sc" id="sc-final" aria-label="Happy Birthday">
+  <div class="sc__inner">
+    <h1 class="f-name" id="fName" hidden></h1>
+    <h2 class="f-hb" id="fHB" hidden>Happy Birthday.</h2>
+    <p class="f-msg" id="fMsg" hidden>May Allah make this year beautiful in ways you haven't even imagined yet.</p>
+    <p class="f-made" id="fMade" hidden>Made especially for you.</p>
+  </div>
+</section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
-<script src="script.js?v=1789028415"></script>
+<script src="script.js?v=1789029403"></script>
 </body>
 </html>
